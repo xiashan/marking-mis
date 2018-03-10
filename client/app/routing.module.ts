@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
-import { MarkersComponent } from './markers/markers.component';
+import { OrdersComponent } from './order/orders.component';
+import { TopicsComponent } from './topic/topics.component';
+import { MembersComponent } from './members/members.component';
 import { AgentsComponent } from './agents/agents.component';
-import { CatsComponent } from './cats/cats.component';
 import { AboutComponent } from './about/about.component';
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
@@ -16,10 +17,11 @@ import { AuthGuardLogin } from './services/auth-guard-login.service';
 import { AuthGuardAdmin } from './services/auth-guard-admin.service';
 
 const routes: Routes = [
-  { path: '', component: AboutComponent },
-  { path: 'markers', component: MarkersComponent},
+  { path: '', component: TopicsComponent },
+  { path: 'orders', component: TopicsComponent},
+  { path: 'topics', component: TopicsComponent},
+  { path: 'members', component: MembersComponent},
   { path: 'agents', component: AgentsComponent},
-  { path: 'cats', component: CatsComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'login', component: LoginComponent },
   { path: 'logout', component: LogoutComponent },

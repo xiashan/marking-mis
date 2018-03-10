@@ -9,8 +9,14 @@ export class AgentService {
 
   constructor(private http: HttpClient) { }
 
-  getAgents(): Observable<Agent[]> {
-    return this.http.get<Agent[]>('/api/agents');
+  getAgents(param = {}): Observable<Agent[]> {
+    const query = [];
+    Object.keys(param).forEach((key) => {
+      if (param[key] !== '' && param[key] !== null) {
+        query.push(`${key}=${encodeURIComponent(param[key])}`);
+      }
+    });
+    return this.http.get<Agent[]>(`/api/agents?${query.join('&')}`);
   }
 
   countAgents(): Observable<number> {

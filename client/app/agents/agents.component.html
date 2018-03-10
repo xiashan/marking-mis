@@ -44,6 +44,7 @@
         </tr>
       </tbody>
     </table>
+    <ngb-pagination [collectionSize]="pageInfo.totalRecord" [(page)]="pageInfo.page" aria-label="members pagination" (pageChange)="changePage($event)"  *ngIf="pageInfo.totalRecord"></ngb-pagination>
   </div>
 </div>
 

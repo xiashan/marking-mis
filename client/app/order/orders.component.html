@@ -1,0 +1,134 @@
+<app-loading [condition]="isLoading"></app-loading>
+
+<app-toast [message]="toast.message"></app-toast>
+
+<div class="card mb-3" *ngIf="!isLoading">
+  <h4 class="card-header">Current topics ({{topics.length}})</h4>
+  <div class="card-body">
+    <form class="mb-4" #searchForm="ngForm" (ngSubmit)="getOrders()">
+      <div class="form-row">
+        <div class="col">
+          <input type="text" class="form-control" placeholder="ID" name="bid" [(ngModel)]="searchTopicForm.no">
+        </div>
+        <div class="col">
+          <input type="text" class="form-control" placeholder="Short Name" name="shortName" [(ngModel)]="searchTopicForm.shortName">
+        </div>
+        <div class="col">
+          <select class="custom-select" name="status" [(ngModel)]="searchTopicForm.status">
+            <option value="">Status</option>
+          </select>
+        </div>
+        <div class="col">
+          <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+      </div>
+    </form>
+    <div class="mb-3">
+      <button type="button" class="btn btn-primary" [disabled]="!settleValid" (click)="settleTopic();">Order</button>
+    </div>
+    <table class="table table-bordered">
+      <thead class="thead-light">
+        <tr>
+          <th style="width: 5%">
+            <input type="checkbox" [(ngModel)]="selectedAll" (change)="selectAll();">
+          </th>
+          <th style="width: 10%">No</th>
+          <th style="width: 20%">Name</th>
+          <th style="width: 10%">Short Name</th>
+          <th style="width: 10%">Total Frames</th>
+          <th style="width: 10%">Assessment</th>
+          <th style="width: 10%">Total Marks</th>
+          <th style="width: 25%">Operation</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="orders.length === 0">
+        <tr>
+          <td colspan="7">There are no topics in the DB. Add a new topic below.</td>
+        </tr>
+      </tbody>
+      <tbody *ngIf="!isEditing">
+        <tr *ngFor="let topic of topics">
+          <td><input type="checkbox" [(ngModel)]="topic.selected" (change)="checkIfAllSelected();"></td>
+          <td>{{topic.no}}</td>
+          <td>{{topic.name}}</td>
+          <td>{{topic.shortName}}</td>
+          <td>{{topic.total}}</td>
+          <td>{{topic.assessment}}</td>
+          <td>{{topic.marks.length}}</td>
+          <td>
+            <button class="btn btn-sm btn-primary mb-2" (click)="importMarks(topic)"><i class="fa fa-download"></i> Import</button>
+            <button class="btn btn-sm btn-primary mb-2" (click)="showMarks(topic, content)"><i class="fa fa-list"></i> Detail</button>
+            <button class="btn btn-sm btn-primary mb-2" (click)="enableEditing(topic)"><i class="fa fa-pencil"></i> Edit</button>
+            <button class="btn btn-sm btn-danger mb-2" (click)="deleteTopic(topic)"><i class="fa fa-trash"></i> Delete</button>
+          </td>
+        </tr>
+      </tbody>
+      <tbody *ngIf="isEditing">
+        <tr>
+          <td colspan="7">
+            <form class="form-inline" #form="ngForm" (ngSubmit)="editTopic(topic)">
+              <input class="form-control mr-2" type="text" name="no" [(ngModel)]="topic.no" placeholder="No" required>
+              <input class="form-control mr-2" type="text" name="name" [(ngModel)]="topic.name" placeholder="Name" required>
+              <input class="form-control mr-2" type="text" name="shortName" [(ngModel)]="topic.shortName" placeholder="Short Name" required>
+              <input class="form-control mr-2" type="number" name="total" [(ngModel)]="topic.total" placeholder="Total" step="any" min="0" required>
+              <input class="form-control mr-2" type="number" name="assessment" [(ngModel)]="topic.assessment" placeholder="Assessment" step="any" min="0" required>
+              <input class="form-control mr-2" type="text" name="note" [(ngModel)]="topic.note" placeholder="Note">
+              <button class="btn btn-sm btn-primary mr-2" type="submit" [disabled]="!form.form.valid"><i class="fa fa-floppy-o"></i> Save</button>
+              <button class="btn btn-sm btn-warning" (click)="cancelEditing()"><i class="fa fa-times"></i> Cancel</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ngb-pagination [collectionSize]="pageInfo.totalRecord" [(page)]="pageInfo.page" aria-label="members pagination" (pageChange)="changePage($event)"  *ngIf="pageInfo.totalRecord"></ngb-pagination>
+  </div>
+</div>
+
+<div class="card" *ngIf="!isEditing">
+  <h4 class="card-header">Add new topic</h4>
+  <div class="card-body">
+    <form class="form-inline" [formGroup]="addTopicForm" (ngSubmit)="addTopic()">
+      <input class="form-control mr-2" type="text" name="no" formControlName="no" placeholder="No">
+      <input class="form-control mr-2" type="text" name="name" formControlName="name" placeholder="Name">
+      <input class="form-control mr-2" type="text" name="shortName" formControlName="shortName" placeholder="shortName">
+      <input class="form-control mr-2" type="number" name="total" formControlName="total" placeholder="Total" step="any" min="0">
+      <input class="form-control mr-2" type="number" name="assessment" formControlName="assessment" placeholder="Assessment" min="0">
+      <input class="form-control mr-2" type="text" name="note" formControlName="note" placeholder="Note">
+      <button class="btn btn-primary" type="submit" [disabled]="!addTopicForm.valid"><i class="fa fa-floppy-o"></i> Add</button>
+    </form>
+  </div>
+</div>
+
+<ng-template #content let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">Modal title</h4>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="mark-list">
+      <table class="table table-bordered">
+        <thead class="thead-light">
+        <tr>
+          <th style="width: 25%">ID</th>
+          <th style="width: 25%">Name</th>
+          <th style="width: 25%">Area Count</th>
+          <th style="width: 25%">Tag</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let mark of topic.marks">
+          <td>{{mark.userId}}</td>
+          <td>{{mark.username}}</td>
+          <td>{{mark.areaCount}}</td>
+          <td>{{mark.name}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
+  </div>
+</ng-template>

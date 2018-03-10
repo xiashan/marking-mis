@@ -5,6 +5,8 @@ import { AgentService } from '../services/agent.service';
 import { ToastComponent } from '../shared/toast/toast.component';
 import { Agent } from '../shared/models/agent.model';
 
+import { NgbPaginationConfig } from "@ng-bootstrap/ng-bootstrap";
+
 @Component({
   selector: 'app-agents',
   templateUrl: './agents.component.html',
@@ -17,6 +19,10 @@ export class AgentsComponent implements OnInit {
   isLoading = true;
   isEditing = false;
 
+  pageInfo: any = {
+    page: 1,
+  };
+
   addAgentForm: FormGroup;
   name = new FormControl('', Validators.required);
   price = new FormControl('', Validators.required);
@@ -24,6 +30,7 @@ export class AgentsComponent implements OnInit {
 
   constructor(private agentService: AgentService,
               private formBuilder: FormBuilder,
+              private config: NgbPaginationConfig,
               public toast: ToastComponent) { }
 
   ngOnInit() {
@@ -36,8 +43,16 @@ export class AgentsComponent implements OnInit {
   }
 
   getAgents() {
-    this.agentService.getAgents().subscribe(
-      data => this.agents = data,
+    const param = {
+      pageNum: this.pageInfo.page,
+      pageSize: this.config.pageSize,
+    };
+    this.agentService.getAgents(param).subscribe(
+      (data: any) => {
+        this.pageInfo.page = data.pageNum;
+        this.pageInfo.totalRecord = data.totalRecord;
+        this.agents = data.retData;
+      },
       error => console.log(error),
       () => this.isLoading = false
     );
@@ -91,4 +106,7 @@ export class AgentsComponent implements OnInit {
     }
   }
 
+  changePage() {
+    console.log(this.pageInfo.page);
+  }
 }
