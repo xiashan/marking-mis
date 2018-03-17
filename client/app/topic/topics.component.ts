@@ -26,7 +26,7 @@ export class TopicsComponent implements OnInit {
   };
 
   searchTopicForm = {
-    status: '',
+    settle: '',
   };
 
   addTopicForm: FormGroup;
@@ -34,7 +34,7 @@ export class TopicsComponent implements OnInit {
   name = new FormControl('', Validators.required);
   shortName = new FormControl('', Validators.required);
   total = new FormControl('', Validators.required);
-  assessment = new FormControl('', Validators.required);
+  withhold = new FormControl('', Validators.required);
   note = new FormControl('');
 
   constructor(private topicService: TopicService,
@@ -50,7 +50,7 @@ export class TopicsComponent implements OnInit {
       name: this.name,
       shortName: this.shortName,
       total: this.total,
-      assessment: this.assessment,
+      withhold: this.withhold,
       note: this.note,
     });
   }
@@ -147,7 +147,9 @@ export class TopicsComponent implements OnInit {
 
   selectAll() {
     this.topics = this.topics.map((item) => {
-      item.selected = this.selectedAll;
+      if (!item.settle) {
+        item.selected = this.selectedAll;
+      }
       return item;
     });
     this.settleValid = this.topics.some(item => item.selected);
@@ -158,13 +160,39 @@ export class TopicsComponent implements OnInit {
     this.settleValid = this.topics.some(item => item.selected);
   }
 
+  /**
+   * 多选题包结算
+   */
   settleTopic() {
-    this.topicService.genOrder(this.topics).subscribe(
-      (res) => {
-        console.log(res);
+    if (window.confirm('Are you sure you want to generate order?')) {
+      this.topicService.genOrder(this.topics).subscribe(
+        (res) => {
+          this.toast.setMessage('item import successfully.', 'success');
+          window.location.href = '/orders';
+        },
+        error => console.log(error)
+      );
+    }
+  }
+
+  fileChange(event, topic) {
+    this.topic = topic;
+    const fileList: FileList = event.target.files;
+    if (fileList.length > 0) {
+      const file: File = fileList[0];
+
+      const formData: FormData = new FormData();
+      formData.append('_id', topic._id);
+      formData.append('file', file, file.name);
+
+      this.topicService.uploadMark(formData).subscribe((res) => {
+        this.topic.marks = res;
         this.toast.setMessage('item import successfully.', 'success');
-      },
-      error => console.log(error)
-    );
+      }, error => console.log(error));
+    }
+  }
+
+  changePage() {
+    this.getTopics();
   }
 }

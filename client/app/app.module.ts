@@ -13,11 +13,12 @@ import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
 import { AuthGuardAdmin } from './services/auth-guard-admin.service';
 import { AppComponent } from './app.component';
+import { OrderMembersComponent } from './order/order-members.component';
+import { OrderAgentsComponent } from './order/order-agents.component';
 import { OrdersComponent } from './order/orders.component';
 import { TopicsComponent } from './topic/topics.component';
 import { MembersComponent } from './members/members.component';
 import { AgentsComponent } from './agents/agents.component';
-import { AboutComponent } from './about/about.component';
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
 import { LogoutComponent } from './logout/logout.component';
@@ -28,11 +29,12 @@ import { NotFoundComponent } from './not-found/not-found.component';
 @NgModule({
   declarations: [
     AppComponent,
+    OrderMembersComponent,
+    OrderAgentsComponent,
     OrdersComponent,
     TopicsComponent,
     MembersComponent,
     AgentsComponent,
-    AboutComponent,
     RegisterComponent,
     LoginComponent,
     LogoutComponent,

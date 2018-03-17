@@ -5,6 +5,7 @@ import AgentCtrl from './controllers/agent';
 import MemberCtrl from './controllers/member';
 import TopicCtrl from './controllers/topic';
 import OrderCtrl from './controllers/order';
+import UploadCtrl from './controllers/upload';
 import User from './models/user';
 import Agent from './models/agent';
 import Member from './models/member';
@@ -20,6 +21,7 @@ export default function setRoutes(app) {
   const memberCtrl = new MemberCtrl();
   const topicCtrl = new TopicCtrl();
   const orderCtrl = new OrderCtrl();
+  const uploadCtrl = new UploadCtrl();
 
   // Users
   router.route('/login').post(userCtrl.login);
@@ -58,8 +60,15 @@ export default function setRoutes(app) {
   // Order
   router.route('/orders').get(orderCtrl.getAll);
   router.route('/orders/count').get(orderCtrl.count);
+  router.route('/order').post(orderCtrl.insert);
   router.route('/order/:id').get(orderCtrl.get);
   router.route('/order/:id').delete(orderCtrl.delete);
+  router.route('/order/member/:id').get(orderCtrl.getMembers);
+  router.route('/order/member-export/:id').get(orderCtrl.exportMembers);
+  router.route('/order/agent-export/:id').get(orderCtrl.exportAgents);
+
+  // file uplaod
+  router.route('/upload').post(uploadCtrl.uploadFile);
 
   // Apply the routes to our application with the prefix /api
   app.use('/api', router);

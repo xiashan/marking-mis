@@ -1,0 +1,65 @@
+<app-loading [condition]="isLoading"></app-loading>
+
+<app-toast [message]="toast.message"></app-toast>
+
+<div class="card mb-3" *ngIf="!isLoading">
+  <h4 class="card-header">Current orders -- {{order.name}}</h4>
+  <div class="card-body">
+    <form class="mb-4" #searchForm="ngForm" (ngSubmit)="getMembers()">
+      <div class="form-row">
+        <div class="col">
+          <input type="text" class="form-control" placeholder="ID" name="bid" [(ngModel)]="searchMemberForm.bid">
+        </div>
+        <div class="col">
+          <input type="text" class="form-control" placeholder="Username" name="username" [(ngModel)]="searchMemberForm.username">
+        </div>
+        <div class="col">
+          <input type="text" class="form-control" placeholder="Tag" name="name" [(ngModel)]="searchMemberForm.name">
+        </div>
+        <div class="col">
+          <select class="custom-select" name="_agent" [(ngModel)]="searchMemberForm._agent">
+            <option value="">Agent</option>
+            <option *ngFor="let agent of agents" value="{{agent._id}}">{{agent.name}}</option>
+            <option value="-1">No Agent</option>
+          </select>
+        </div>
+        <div class="col">
+          <button class="btn btn-primary mr-2" type="submit">Search</button>
+          <button type="button" class="btn btn-primary" (click)="exportList(order._id);">Export</button>
+        </div>
+      </div>
+    </form>
+    
+    <table class="table table-bordered">
+      <thead class="thead-light">
+      <tr>
+        <th style="width: 15%">ID</th>
+        <th style="width: 20%">Name</th>
+        <th style="width: 20%">Tag</th>
+        <th style="width: 15%">Area Count</th>
+        <th style="width: 15%">Income</th>
+        <th style="width: 15%">Agent</th>
+      </tr>
+      </thead>
+      <tbody *ngIf="orderMembers.length === 0">
+      <tr>
+        <td colspan="6">There are no orders in the DB.</td>
+      </tr>
+      </tbody>
+      <tbody>
+      <tr *ngFor="let order of orderMembers" [ngClass]="{'text-danger': !order.isBelong}">
+        <td>{{order.userId}}</td>
+        <td>{{order.username}}</td>
+        <td>{{order.name}}</td>
+        <td>{{order.areaCount}}</td>
+        <td>{{order.income.toFixed(2)}}</td>
+        <td>{{order.agent}}</td>
+      </tr>
+      </tbody>
+    </table>
+    <ngb-pagination [collectionSize]="pageInfo.totalRecord" [(page)]="pageInfo.page" aria-label="members pagination" (pageChange)="changePage($event)"  *ngIf="pageInfo.totalRecord"></ngb-pagination>
+    <div>
+      <button class="btn btn-primary" (click)="back()">返回</button>
+    </div>
+  </div>
+</div>

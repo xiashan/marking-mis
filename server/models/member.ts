@@ -5,7 +5,6 @@ const memberSchema = new mongoose.Schema({
   username: { type: String, unique: true, trim: true },
   name: String,
   _agent: { type: mongoose.Schema.Types.ObjectId, ref: 'Agent' },
-  isDelete: Boolean,
 }, { timestamps: true });
 
 const Member = mongoose.model('Member', memberSchema);

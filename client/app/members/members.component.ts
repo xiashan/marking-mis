@@ -28,7 +28,7 @@ export class MembersComponent implements OnInit {
     page: 1,
   };
 
-  searchMemberForm = {
+  searchMemberForm: any = {
     _agent: '',
   };
 
@@ -61,7 +61,6 @@ export class MembersComponent implements OnInit {
     param.pageSize = this.config.pageSize;
     this.memberService.getMembers(param).subscribe(
       (data: any) => {
-        this.pageInfo.page = data.pageNum;
         this.pageInfo.totalRecord = data.totalRecord;
         this.members = data.retData;
       },
@@ -79,9 +78,14 @@ export class MembersComponent implements OnInit {
 
   addMember() {
     this.memberService.addMember(this.addMemberForm.value).subscribe(
-      res => {
+      (res: any) => {
+        // 关联agent
+        res._agent = this.agents.filter(item => item._id === res._agent)[0];
         this.members.push(res);
         this.addMemberForm.reset();
+        this.addMemberForm.patchValue({
+          _agent: '',
+        });
         this.toast.setMessage('item added successfully.', 'success');
       },
       error => console.log(error)
@@ -126,7 +130,7 @@ export class MembersComponent implements OnInit {
   }
 
   changePage() {
-    // alert(this.pageInfo.page);
+    this.getMembers();
   }
 
 }

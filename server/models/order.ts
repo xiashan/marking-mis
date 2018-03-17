@@ -5,6 +5,7 @@ import * as mongoose from 'mongoose';
 
 const memberFSchema = new mongoose.Schema({
   _member: { type: mongoose.Schema.Types.ObjectId, ref: 'Member' },
+  _agent: { type: mongoose.Schema.Types.ObjectId, ref: 'Agent' },
   userId: String,
   username: String,
   name: String,
@@ -22,7 +23,7 @@ const agentFSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
   name: { type: String, unique: true, trim: true },
-  income: Number,
+  topicList: [String],
   areaCount: Number,
   memberList: [memberFSchema],
   agentList: [agentFSchema],

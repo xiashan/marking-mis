@@ -3,7 +3,8 @@ export class Topic {
   no?: string;
   name?: string;
   total?: number;
-  assessment?: number;
+  withhold?: boolean;
+  settle?: boolean;
   passTime?: number;
   note?: string;
   marks?: Array<any>;

@@ -19,12 +19,22 @@ export class OrderService {
     return this.http.get<Order[]>(`/api/orders?${query.join('&')}`);
   }
 
+  getOrderMembers(id, param = {}): Observable<Order[]> {
+    const query = [];
+    Object.keys(param).forEach((key) => {
+      if (param[key] !== '' && param[key] !== null) {
+        query.push(`${key}=${encodeURIComponent(param[key])}`);
+      }
+    });
+    return this.http.get<Order[]>(`/api/order/member/${id}?${query.join('&')}`);
+  }
+
   countOrders(): Observable<number> {
     return this.http.get<number>('/api/orders/count');
   }
 
-  getOrder(order: Order): Observable<Order> {
-    return this.http.get<Order>(`/api/order/${order._id}`);
+  getOrder(id: string): Observable<Order> {
+    return this.http.get<Order>(`/api/order/${id}`);
   }
 
   deleteOrder(order: Order): Observable<string> {

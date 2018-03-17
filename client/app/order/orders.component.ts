@@ -24,9 +24,7 @@ export class OrdersComponent implements OnInit {
     page: 1,
   };
 
-  searchTopicForm = {
-    status: '',
-  };
+  searchOrderForm = {};
 
   constructor(private orderService: OrderService,
               private config: NgbPaginationConfig,
@@ -37,7 +35,7 @@ export class OrdersComponent implements OnInit {
   }
 
   getOrders() {
-    const param = Object.assign(this.searchTopicForm);
+    const param = Object.assign(this.searchOrderForm);
     param.pageNum = this.pageInfo.page;
     param.pageSize = this.config.pageSize;
 
@@ -52,7 +50,7 @@ export class OrdersComponent implements OnInit {
     );
   }
 
-  deleteTopic(order: Order) {
+  deleteOrder(order: Order) {
     if (window.confirm('Are you sure you want to permanently delete this item?')) {
       this.orderService.deleteOrder(order).subscribe(
         () => {
@@ -63,5 +61,9 @@ export class OrdersComponent implements OnInit {
         error => console.log(error)
       );
     }
+  }
+
+  changePage() {
+    this.getOrders();
   }
 }

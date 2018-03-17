@@ -1,5 +1,5 @@
 import { TestBed, async } from '@angular/core/testing';
-import { AgentsComponent } from './members.component';
+import { MembersComponent } from './members.component';
 
 /*describe('Component: Cats', () => {
   it('should create an instance', () => {

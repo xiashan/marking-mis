@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 import { Topic } from '../shared/models/topic.model';
@@ -48,4 +48,7 @@ export class TopicService {
     return this.http.post('/api/order', { topicId: topicId }, { responseType: 'text' });
   }
 
+  uploadMark(fileData: FormData): Observable<any> {
+    return this.http.post('/api/upload', fileData);
+  }
 }

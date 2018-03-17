@@ -2,151 +2,210 @@
  * Created by xiashan on 18/3/5.
  */
 import Order from '../models/order';
-import Topic from '../models/topic';
-import Member from '../models/member';
-import Agent from '../models/agent';
 import BaseCtrl from './base';
 
+import TopicService from '../services/topic';
+import MemberService from '../services/member';
+import OrderService from '../services/order';
+import AgentService from '../services/agent';
+
 import DBHelper from '../helper/db';
+import IconvHelper from '../helper/iconv';
 
 export default class OrderCtrl extends BaseCtrl {
   model = Order;
-  topicModel = Topic;
-  memberModel = Member;
-  agentModel = Agent;
+
+  getAll = (req, res) => {
+    const { name, pageNum = '1', pageSize = '10' } = req.query;
+    const filter: any = {};
+    if (name) {
+      filter.name = name;
+    }
+
+    const callback = (err, docs) => {
+      if (err) { return console.error(err); }
+      res.status(200).json(docs);
+    };
+
+    DBHelper.pageQuery(parseInt(pageNum, 10),
+      parseInt(pageSize, 10),
+      this.model,
+      '',
+      filter,
+      '',
+      '_id name areaCount memberList agentList',
+      callback);
+  }
 
   insert = (req, res) => {
     const topicId = req.body.topicId;
 
-    // 获取所有的member信息
-    const getMembers = (memberBids) => {
-      return new Promise((resolve, reject) => {
-        this.memberModel
-          .find({
-            bid: { $in: memberBids }
-          })
-          .populate('_agent')
-          .exec((err, members) => {
-            if (err) {
-              return reject(err);
-            }
-            const result = {};
-            members.forEach(member => result[member.bid] = member);
-            resolve(result);
-          });
-      });
+    const topicService = new TopicService();
+    const memberService = new MemberService();
+    const orderService = new OrderService();
+
+    const save = async () => {
+      const topics = await topicService.findTopicByIds(topicId);
+      const memberBids = await topicService.getTopicMembers(topics);
+      const members = await memberService.getMemberByBids(memberBids);
+      const orderInfo = await orderService.getOrderInfo(topics, members);
+      const saveOrder =  await orderService.saveOrder(orderInfo);
+      const updateTopic =  await topicService.updateSettleStatus(orderInfo, true);
+      return true;
     };
 
-    const getTopicIncome = async (memberBids) => {
-      return await getMembers(memberBids);
-    };
-
-    const computeIncome = (topics) => {
-      const name = [];
-      const agentList: any = {};
-      const memberList: any = {};
-      let memberObj: any = {};
-      let totalIncome = 0;
-      let totalAreaCount = 0;
-
-      // 获取所有的memberBid
-      let memberBids = [];
-      topics.forEach(topic => {
-        topic.marks.forEach(mark => {
-          memberBids.push(mark.userId);
-        });
-      });
-      memberBids = memberBids.filter((bid, index, self) => {
-        return self.indexOf(bid) === index;
-      });
-
-      getTopicIncome(memberBids).then(result => {
-        memberObj = result;
-        topics.forEach(topic => {
-          name.push(topic.shortName);
-          totalAreaCount += topic.total;
-          totalIncome += topic.assessment * topic.total;
-          const priceField = topic.assessment === 13 ? 'price' : 'discountPrice';
-          topic.marks.forEach(mark => {
-            // members
-            if (!memberObj[mark.userId]) {
-              // 如果没有所属代理
-              if (memberList[mark.userId]) {
-                memberList[mark.userId].areaCount += mark.areaCount;
-              } else {
-                memberList[mark.userId] = {
-                  userId: mark.userId,
-                  username: mark.username,
-                  name: mark.name,
-                  areaCount: mark.areaCount,
-                  isBelong: false,
-                };
-              }
-            } else {
-              // 有所属代理
-              if (memberList[mark.userId]) {
-                memberList[mark.userId].areaCount += mark.areaCount;
-                memberList[mark.userId].income += mark.areaCount * (memberObj[mark.userId]._agent[priceField]);
-              } else {
-                memberList[mark.userId] = {
-                  _member: memberObj[mark.userId]._id,
-                  userId: mark.userId,
-                  username: mark.username,
-                  name: mark.name,
-                  areaCount: mark.areaCount,
-                  income: mark.areaCount * (memberObj[mark.userId]._agent[priceField]),
-                  isBelong: true,
-                };
-              }
-            }
-
-            // agents
-            if (memberObj[mark.userId]) {
-              const agentId = memberObj[mark.userId]._agent._id;
-              const agentName = memberObj[mark.userId]._agent.name;
-              if (agentList[agentId]) {
-                agentList[agentId].areaCount += mark.areaCount;
-                agentList[agentId].income += mark.areaCount * (memberObj[mark.userId]._agent[priceField]);
-              } else {
-                agentList[agentId] = {
-                  _agent: agentId,
-                  name: agentName,
-                  areaCount: mark.areaCount,
-                  income: mark.areaCount * (memberObj[mark.userId]._agent[priceField]),
-                };
-              }
-            }
-
-          });
-        });
-        const settle = {
-          name: name.join(','),
-          income: totalIncome,
-          areaCount: totalAreaCount,
-          memberList: Object.keys(memberList).map(item => memberList[item]),
-          agentList: Object.keys(agentList).map(item => memberList[item]),
-        };
-        const obj = new this.model(settle);
-        obj.save((err, item) => {
-          // 11000 is the code for duplicate key error
-          if (err && err.code === 11000) {
-            res.sendStatus(400);
-          }
-          if (err) {
-            return console.error(err);
-          }
-          res.sendStatus(200);
-        });
-      });
-    };
-
-    // 获取所有的marks
-    this.topicModel.find({
-      _id: { $in: topicId }
-    }, (err, topics) => {
-      if (err) { return console.error(err); }
-      computeIncome(topics);
+    save().then((result) => {
+      res.sendStatus(200);
+    }, err => {
+      return console.error(err);
     });
+  }
 
+  delete = (req, res) => {
+    const orderService = new OrderService();
+    const topicService = new TopicService();
+    const id = req.params.id;
+    const deleteOrder = async () => {
+      const orderInfo = await orderService.getOrder(id);
+      // 删除order
+      const dt = await orderService.deleteOrder(id);
+      // 更新topic的状态
+      const tp = await topicService.updateSettleStatus(orderInfo, false);
+      return true;
+    };
+    deleteOrder().then(result => {
+      res.sendStatus(200);
+    }, err => {
+      return console.error(err);
+    });
+  }
+
+  getMembers = (req, res) => {
+    const id = req.params.id;
+    const { bid, username, name, _agent, pageNum = 1, pageSize = 10 } = req.query;
+
+    const orderService = new OrderService();
+    const agentService = new AgentService();
+
+    const getData = async () => {
+      const agents: any = await agentService.getList();
+      const order: any = await orderService.getOrder(id);
+      return { agents, order };
+    };
+
+    getData().then(result => {
+      const agents = result.agents;
+      let memberList = result.order.memberList;
+      // 做筛选
+      if (bid) {
+        memberList = memberList.filter(item => item.userId === String(bid));
+      }
+      if (username) {
+        memberList = memberList.filter(item => item.username.indexOf(username) >= 0 );
+      }
+      if (name) {
+        memberList = memberList.filter(item => item.name.indexOf(name) >= 0);
+      }
+      if (_agent) {
+        if (_agent === '-1') {
+          memberList = memberList.filter(item => !item._agent);
+        } else {
+          memberList = memberList.filter(item => item._agent == _agent);
+        }
+      }
+      const totalRecord = memberList.length;
+      memberList = memberList.slice((pageNum - 1) * pageSize, pageNum * pageSize);
+      const retData = [];
+      // TODO 不能直接往item赋值，why？？？
+      memberList.forEach(item => {
+        const obj = {
+          userId: item.userId,
+          username: item.username,
+          name: item.name,
+          areaCount: item.areaCount,
+          income: item.income,
+          isBelong: item.isBelong,
+          agent: item._agent ? agents[item._agent].name : '',
+        };
+        retData.push(obj);
+      });
+      const orderData = {
+        _id: result.order._id,
+        name: result.order.name,
+      };
+      res.status(200).json({
+        pageNum: pageNum,
+        totalRecord,
+        orderData,
+        retData,
+      });
+    }, error => {
+      return console.error(error);
+    });
+  }
+
+  exportMembers = (req, res) => {
+    const orderService = new OrderService();
+    const agentService = new AgentService();
+
+    const id = req.params.id;
+    const { bid, username, name, _agent } = req.query;
+
+    const getData = async () => {
+      const agents: any = await agentService.getList();
+      const order: any = await orderService.getOrder(id);
+      return { agents, order };
+    };
+
+    getData().then(result => {
+      const agents = result.agents;
+      let memberList = result.order.memberList;
+      // 做筛选
+      if (bid) {
+        memberList = memberList.filter(item => item.userId === String(bid));
+      }
+      if (username) {
+        memberList = memberList.filter(item => item.username.indexOf(username) >= 0 );
+      }
+      if (name) {
+        memberList = memberList.filter(item => item.name.indexOf(name) >= 0);
+      }
+      if (_agent) {
+        if (_agent === '-1') {
+          memberList = memberList.filter(item => !item._agent);
+        } else {
+          memberList = memberList.filter(item => item._agent == _agent);
+        }
+      }
+
+      const head = ['userId', 'username', 'name', 'areaCount', 'income', '_agent'];
+      const body = [head];
+
+      memberList.forEach((item) => body.push([
+        item[head[0]], item[head[1]], item[head[2]], item[head[3]], item[head[4]].toFixed(2), item[head[5]] ? agents[item[head[5]]].name : '',
+      ]));
+      const content = body.reduce( (accumulator, currentValue) => `${accumulator}${currentValue.join(',')}\n`, '');
+      res.setHeader('Content-disposition', `attachment; filename='${result.order.name}-member.csv'`);
+      res.setHeader('Content-type', 'text/csv; charset=GBK');
+      res.end(IconvHelper.iconv2gbk(content));
+    }, error => {
+      return console.error(error);
+    });
+  }
+
+  exportAgents = (req, res) => {
+    const orderService = new OrderService();
+    const id = req.params.id;
+    orderService.getOrder(id).then((result: any) => {
+      const head = ['name', 'areaCount', 'income'];
+      const body = [head];
+      result.agentList.forEach((item) => body.push([item[head[0]], item[head[1]], item[head[2]].toFixed(2)]));
+      const content = body.reduce( (accumulator, currentValue) => `${accumulator}${currentValue.join(',')}\n`, '');
+      res.setHeader('Content-disposition', `attachment; filename='${result.name}-agent.csv'`);
+      res.setHeader('Content-type', 'text/csv; charset=GBK');
+      res.end(IconvHelper.iconv2gbk(content));
+    }, error => {
+      return console.error(error);
+    });
   }
 }

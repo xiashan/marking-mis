@@ -2,3 +2,17 @@
   max-height: 500px;
   overflow-y: auto;
 }
+.upload-file {
+  position: relative;
+  cursor: pointer;
+}
+.upload-file > input {
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  opacity: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  cursor: pointer;
+}

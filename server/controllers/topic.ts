@@ -7,7 +7,7 @@ export default class TopicCtrl extends BaseCtrl {
   model = Topic;
 
   getAll = (req, res) => {
-    const { no, shortName, status, pageNum = '1', pageSize = '10' } = req.query;
+    const { no, shortName, settle, pageNum = '1', pageSize = '10' } = req.query;
     const filter: any = {};
     if (no) {
       filter.no = no;
@@ -17,10 +17,9 @@ export default class TopicCtrl extends BaseCtrl {
       filter.shortName = shortName;
     }
 
-    if (status === 1) {
-      filter.assessment = { $gt: 13 };
-    } else if (status === 2) {
-      filter.assessment = { $lt: 13 };
+    console.log(typeof settle);
+    if (settle) {
+      filter.settle = settle;
     }
 
     const callback = (err, docs) => {
