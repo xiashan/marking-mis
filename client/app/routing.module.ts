@@ -13,21 +13,22 @@ import { LogoutComponent } from './logout/logout.component';
 import { AccountComponent } from './account/account.component';
 import { AdminComponent } from './admin/admin.component';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { WelcomeComponent } from './welcome/welcome.component';
 
 import { AuthGuardLogin } from './services/auth-guard-login.service';
 import { AuthGuardAdmin } from './services/auth-guard-admin.service';
 
 const routes: Routes = [
-  { path: '', component: TopicsComponent },
-  { path: 'orders', component: OrdersComponent},
-  { path: 'order/members/:id', component: OrderMembersComponent},
-  { path: 'order/agents/:id', component: OrderAgentsComponent},
-  { path: 'topics', component: TopicsComponent},
-  { path: 'members', component: MembersComponent},
-  { path: 'agents', component: AgentsComponent},
+  { path: '', component: WelcomeComponent },
+  { path: 'orders', component: OrdersComponent, canActivate: [AuthGuardAdmin] },
+  { path: 'order/members/:id', component: OrderMembersComponent, canActivate: [AuthGuardAdmin] },
+  { path: 'order/agents/:id', component: OrderAgentsComponent, canActivate: [AuthGuardAdmin] },
+  { path: 'topics', component: TopicsComponent, canActivate: [AuthGuardLogin] },
+  { path: 'members', component: MembersComponent, canActivate: [AuthGuardLogin] },
+  { path: 'agents', component: AgentsComponent, canActivate: [AuthGuardLogin] },
   { path: 'register', component: RegisterComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'logout', component: LogoutComponent },
+  { path: 'logout', component: LogoutComponent, canActivate: [AuthGuardLogin] },
   { path: 'account', component: AccountComponent, canActivate: [AuthGuardLogin] },
   { path: 'admin', component: AdminComponent, canActivate: [AuthGuardAdmin] },
   { path: 'notfound', component: NotFoundComponent },

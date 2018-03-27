@@ -58,7 +58,7 @@ export class TopicsComponent implements OnInit {
   getTopics() {
     const param = Object.assign(this.searchTopicForm);
     param.pageNum = this.pageInfo.page;
-    param.pageSize = this.config.pageSize;
+    param.pageSize = 50;
 
     this.topicService.getTopics(param).subscribe(
       (data: any) => {

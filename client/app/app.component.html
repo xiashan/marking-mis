@@ -7,22 +7,22 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a routerLink="/" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+          <a routerLink="/topics" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn">
             <i class="fa fa-home"></i> 题包
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="/orders" class="nav-link" routerLinkActive="active">
+          <a routerLink="/orders" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn && auth.isAdmin">
             <i class="fa fa-list"></i> 结算
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="/agents" class="nav-link" routerLinkActive="active">
+          <a routerLink="/agents" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn">
             <i class="fa fa-list"></i> 代理商
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="/members" class="nav-link" routerLinkActive="active">
+          <a routerLink="/members" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn">
             <i class="fa fa-list"></i> 标注员
           </a>
         </li>
@@ -31,11 +31,11 @@
             <i class="fa fa-sign-in"></i> 登陆
           </a>
         </li>
-        <li class="nav-item">
-          <a routerLink="/register" class="nav-link" routerLinkActive="active" *ngIf="!auth.loggedIn">
-            <i class="fa fa-user-plus"></i> 注册
-          </a>
-        </li>
+        <!--<li class="nav-item">-->
+          <!--<a routerLink="/register" class="nav-link" routerLinkActive="active" *ngIf="!auth.loggedIn">-->
+            <!--<i class="fa fa-user-plus"></i> 注册-->
+          <!--</a>-->
+        <!--</li>-->
         <li class="nav-item">
           <a routerLink="/account" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn">
             <i class="fa fa-user"></i> 账户 ({{auth.currentUser.username}})
