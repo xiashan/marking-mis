@@ -3,31 +3,31 @@
 <app-toast [message]="toast.message"></app-toast>
 
 <div class="card mb-3" *ngIf="!isLoading">
-  <h4 class="card-header">Current orders ({{orders.length}})</h4>
+  <h4 class="card-header">结算列表 ({{orders.length}})</h4>
   <div class="card-body">
     <form class="mb-4" #searchForm="ngForm" (ngSubmit)="getOrders()">
       <div class="form-row">
         <div class="col">
-          <input type="text" class="form-control" placeholder="Name" name="name" [(ngModel)]="searchOrderForm.name">
+          <input type="text" class="form-control" placeholder="名称" name="name" [(ngModel)]="searchOrderForm.name">
         </div>
         <div class="col">
-          <button class="btn btn-primary" type="submit">Search</button>
+          <button class="btn btn-primary" type="submit">查询</button>
         </div>
       </div>
     </form>
     <table class="table table-bordered">
       <thead class="thead-light">
         <tr>
-          <th style="width: 20%">Name</th>
-          <th style="width: 18%">Area Count</th>
-          <th style="width: 18%">Agent Count</th>
-          <th style="width: 18%">Member Count</th>
-          <th style="width: 26%">Operation</th>
+          <th style="width: 20%">名称</th>
+          <th style="width: 18%">帧数</th>
+          <th style="width: 18%">代理商数量</th>
+          <th style="width: 18%">标注员数量</th>
+          <th style="width: 26%">操作</th>
         </tr>
       </thead>
       <tbody *ngIf="orders.length === 0">
         <tr>
-          <td colspan="5">There are no orders in the DB. Add a new order below.</td>
+          <td colspan="5">暂时没有结算订单. 选择题包生成订单.</td>
         </tr>
       </tbody>
       <tbody>
@@ -37,9 +37,9 @@
           <td>{{order.agentList.length}}</td>
           <td>{{order.memberList.length}}</td>
           <td>
-            <a class="btn btn-sm btn-primary mb-2" [routerLink]="['/order/agents', order._id]"><i class="fa fa-list"></i> Agents</a>
-            <a class="btn btn-sm btn-primary mb-2" [routerLink]="['/order/members', order._id]"><i class="fa fa-list"></i> Members</a>
-            <button class="btn btn-sm btn-danger mb-2" (click)="deleteOrder(order)"><i class="fa fa-trash"></i> Delete</button>
+            <a class="btn btn-sm btn-primary mb-2" [routerLink]="['/order/agents', order._id]"><i class="fa fa-list"></i> 代理商</a>
+            <a class="btn btn-sm btn-primary mb-2" [routerLink]="['/order/members', order._id]"><i class="fa fa-list"></i> 标注员</a>
+            <button class="btn btn-sm btn-danger mb-2" (click)="deleteOrder(order)"><i class="fa fa-trash"></i> 删除</button>
           </td>
         </tr>
       </tbody>

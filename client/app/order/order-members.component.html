@@ -3,29 +3,29 @@
 <app-toast [message]="toast.message"></app-toast>
 
 <div class="card mb-3" *ngIf="!isLoading">
-  <h4 class="card-header">Current orders -- {{order.name}}</h4>
+  <h4 class="card-header">当前订单 -- {{order.name}}</h4>
   <div class="card-body">
     <form class="mb-4" #searchForm="ngForm" (ngSubmit)="getMembers()">
       <div class="form-row">
         <div class="col">
-          <input type="text" class="form-control" placeholder="ID" name="bid" [(ngModel)]="searchMemberForm.bid">
+          <input type="text" class="form-control" placeholder="百度ID" name="bid" [(ngModel)]="searchMemberForm.bid">
         </div>
         <div class="col">
-          <input type="text" class="form-control" placeholder="Username" name="username" [(ngModel)]="searchMemberForm.username">
+          <input type="text" class="form-control" placeholder="用户名" name="username" [(ngModel)]="searchMemberForm.username">
         </div>
         <div class="col">
-          <input type="text" class="form-control" placeholder="Tag" name="name" [(ngModel)]="searchMemberForm.name">
+          <input type="text" class="form-control" placeholder="标签" name="name" [(ngModel)]="searchMemberForm.name">
         </div>
         <div class="col">
           <select class="custom-select" name="_agent" [(ngModel)]="searchMemberForm._agent">
-            <option value="">Agent</option>
+            <option value="">代理商</option>
             <option *ngFor="let agent of agents" value="{{agent._id}}">{{agent.name}}</option>
-            <option value="-1">No Agent</option>
+            <option value="-1">无所属代理商</option>
           </select>
         </div>
         <div class="col">
-          <button class="btn btn-primary mr-2" type="submit">Search</button>
-          <button type="button" class="btn btn-primary" (click)="exportList(order._id);">Export</button>
+          <button class="btn btn-primary mr-2" type="submit">查询</button>
+          <button type="button" class="btn btn-primary" (click)="exportList(order._id);">导出</button>
         </div>
       </div>
     </form>
@@ -33,12 +33,12 @@
     <table class="table table-bordered">
       <thead class="thead-light">
       <tr>
-        <th style="width: 15%">ID</th>
-        <th style="width: 20%">Name</th>
-        <th style="width: 20%">Tag</th>
-        <th style="width: 15%">Area Count</th>
-        <th style="width: 15%">Income</th>
-        <th style="width: 15%">Agent</th>
+        <th style="width: 15%">百度ID</th>
+        <th style="width: 20%">用户名</th>
+        <th style="width: 20%">标签</th>
+        <th style="width: 15%">框数</th>
+        <th style="width: 15%">收入</th>
+        <th style="width: 15%">代理商</th>
       </tr>
       </thead>
       <tbody *ngIf="orderMembers.length === 0">

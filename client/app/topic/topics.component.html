@@ -3,7 +3,7 @@
 <app-toast [message]="toast.message"></app-toast>
 
 <div class="card mb-3" *ngIf="!isLoading">
-  <h4 class="card-header">Current topics ({{topics.length}})</h4>
+  <h4 class="card-header">题包列表 ({{topics.length}})</h4>
   <div class="card-body">
     <form class="mb-4" #searchForm="ngForm" (ngSubmit)="getTopics()">
       <div class="form-row">
@@ -11,22 +11,22 @@
           <input type="text" class="form-control" placeholder="ID" name="bid" [(ngModel)]="searchTopicForm.no">
         </div>
         <div class="col">
-          <input type="text" class="form-control" placeholder="Short Name" name="shortName" [(ngModel)]="searchTopicForm.shortName">
+          <input type="text" class="form-control" placeholder="简称" name="shortName" [(ngModel)]="searchTopicForm.shortName">
         </div>
         <div class="col">
           <select class="custom-select" name="settle" [(ngModel)]="searchTopicForm.settle">
-            <option value="">Settle</option>
-            <option value=false>no settle</option>
-            <option value=true>settled</option>
+            <option value="">结算</option>
+            <option value=false>未结算</option>
+            <option value=true>已结算</option>
           </select>
         </div>
         <div class="col">
-          <button class="btn btn-primary" type="submit">Search</button>
+          <button class="btn btn-primary" type="submit">查询</button>
         </div>
       </div>
     </form>
-    <div class="mb-3">
-      <button type="button" class="btn btn-primary" [disabled]="!settleValid" (click)="settleTopic();">Order</button>
+    <div class="mb-3" *ngIf="auth.isAdmin">
+      <button type="button" class="btn btn-primary" [disabled]="!settleValid" (click)="settleTopic();">生成订单</button>
     </div>
     <table class="table table-bordered">
       <thead class="thead-light">
@@ -34,19 +34,18 @@
           <th style="width: 5%">
             <input type="checkbox" [(ngModel)]="selectedAll" (change)="selectAll();">
           </th>
-          <th style="width: 10%">No</th>
-          <th style="width: 20%">Name</th>
-          <th style="width: 10%">Short Name</th>
-          <th style="width: 10%">Total Frames</th>
-          <th style="width: 10%">Withhold</th>
-          <th style="width: 10%">Total Marks</th>
-          <th style="width: 25%">Operation</th>
+          <th style="width: 10%">ID</th>
+          <th style="width: 20%">名称</th>
+          <th style="width: 10%">简称</th>
+          <th style="width: 10%">帧数</th>
+          <th style="width: 10%">扣款</th>
+          <th style="width: 10%">标注员数</th>
+          <th style="width: 25%">操作</th>
         </tr>
       </thead>
       <tbody *ngIf="topics.length === 0">
         <tr>
-          <td colspan="8">There are no topics in the DB. Add a new topic below.</td>
-        </tr>
+          <td colspan="8">暂时没有题包，点击增加题包。</tr>
       </tbody>
       <tbody *ngIf="!isEditing">
         <tr *ngFor="let topic of topics">
@@ -59,12 +58,12 @@
           <td>{{topic.marks.length}}</td>
           <td>
             <div class="upload-file btn btn-sm btn-primary mb-2" *ngIf="!topic.settle">
-              <span><i class="fa fa-upload"></i> Upload</span>
+              <span><i class="fa fa-upload"></i> 上传标注</span>
               <input type="file" class="btn btn-sm btn-primary mb-2" (change)="fileChange($event, topic)" placeholder="Upload file" accept=".csv,.xls">
             </div>
-            <button class="btn btn-sm btn-primary mb-2" (click)="showMarks(topic, content)"><i class="fa fa-list"></i> Detail</button>
-            <button class="btn btn-sm btn-primary mb-2" (click)="enableEditing(topic)" *ngIf="!topic.settle"><i class="fa fa-pencil"></i> Edit</button>
-            <button class="btn btn-sm btn-danger mb-2" (click)="deleteTopic(topic)" *ngIf="!topic.settle"><i class="fa fa-trash"></i> Delete</button>
+            <button class="btn btn-sm btn-primary mb-2" (click)="showMarks(topic, content)"><i class="fa fa-list"></i> 标注列表</button>
+            <button class="btn btn-sm btn-primary mb-2" (click)="enableEditing(topic)" *ngIf="!topic.settle"><i class="fa fa-pencil"></i> 编辑</button>
+            <button class="btn btn-sm btn-danger mb-2" (click)="deleteTopic(topic)" *ngIf="!topic.settle"><i class="fa fa-trash"></i> 删除</button>
           </td>
         </tr>
       </tbody>
@@ -72,17 +71,17 @@
         <tr>
           <td colspan="8">
             <form class="form-inline" #form="ngForm" (ngSubmit)="editTopic(topic)">
-              <input class="form-control mr-2" type="text" name="no" [(ngModel)]="topic.no" placeholder="No" required>
-              <input class="form-control mr-2" type="text" name="name" [(ngModel)]="topic.name" placeholder="Name" required>
-              <input class="form-control mr-2" type="text" name="shortName" [(ngModel)]="topic.shortName" placeholder="Short Name" required>
-              <input class="form-control mr-2" type="number" name="total" [(ngModel)]="topic.total" placeholder="Total" step="any" min="0" required>
+              <input class="form-control mr-2" type="text" name="no" [(ngModel)]="topic.no" placeholder="ID" required>
+              <input class="form-control mr-2" type="text" name="name" [(ngModel)]="topic.name" placeholder="名称" required>
+              <input class="form-control mr-2" type="text" name="shortName" [(ngModel)]="topic.shortName" placeholder="简称" required>
+              <input class="form-control mr-2" type="number" name="total" [(ngModel)]="topic.total" placeholder="帧数" step="any" min="0" required>
               <select class="form-control mr-2" name="withhold" [(ngModel)]="topic.withhold" required>
-                <option value=false>no withhold</option>
-                <option value=true>withhold</option>
+                <option value=false>无扣款</option>
+                <option value=true>有扣款</option>
               </select>
-              <input class="form-control mr-2" type="text" name="note" [(ngModel)]="topic.note" placeholder="Note">
-              <button class="btn btn-sm btn-primary mr-2" type="submit" [disabled]="!form.form.valid"><i class="fa fa-floppy-o"></i> Save</button>
-              <button class="btn btn-sm btn-warning" (click)="cancelEditing()"><i class="fa fa-times"></i> Cancel</button>
+              <input class="form-control mr-2" type="text" name="note" [(ngModel)]="topic.note" placeholder="备注">
+              <button class="btn btn-sm btn-primary mr-2" type="submit" [disabled]="!form.form.valid"><i class="fa fa-floppy-o"></i> 保存</button>
+              <button class="btn btn-sm btn-warning" (click)="cancelEditing()"><i class="fa fa-times"></i> 取消</button>
             </form>
           </td>
         </tr>
@@ -93,27 +92,27 @@
 </div>
 
 <div class="card" *ngIf="!isEditing">
-  <h4 class="card-header">Add new topic</h4>
+  <h4 class="card-header">新增题包</h4>
   <div class="card-body">
     <form class="form-inline" [formGroup]="addTopicForm" (ngSubmit)="addTopic()">
-      <input class="form-control mr-2" type="text" name="no" formControlName="no" placeholder="No">
-      <input class="form-control mr-2" type="text" name="name" formControlName="name" placeholder="Name">
-      <input class="form-control mr-2" type="text" name="shortName" formControlName="shortName" placeholder="shortName">
-      <input class="form-control mr-2" type="number" name="total" formControlName="total" placeholder="Total" step="any" min="0">
+      <input class="form-control mr-2" type="text" name="no" formControlName="no" placeholder="ID">
+      <input class="form-control mr-2" type="text" name="name" formControlName="name" placeholder="名称">
+      <input class="form-control mr-2" type="text" name="shortName" formControlName="shortName" placeholder="简称">
+      <input class="form-control mr-2" type="number" name="total" formControlName="total" placeholder="帧数" step="any" min="0">
       <select class="form-control mr-2" name="withhold" formControlName="withhold">
-        <option value='' disabled>Withhold</option>
-        <option value=false>no withhold</option>
-        <option value=true>withhold</option>
+        <option value='' disabled>扣款</option>
+        <option value=false>无扣款</option>
+        <option value=true>有扣款</option>
       </select>
-      <input class="form-control mr-2" type="text" name="note" formControlName="note" placeholder="Note">
-      <button class="btn btn-primary" type="submit" [disabled]="!addTopicForm.valid"><i class="fa fa-floppy-o"></i> Add</button>
+      <input class="form-control mr-2" type="text" name="note" formControlName="note" placeholder="备注">
+      <button class="btn btn-primary" type="submit" [disabled]="!addTopicForm.valid"><i class="fa fa-floppy-o"></i> 新增</button>
     </form>
   </div>
 </div>
 
 <ng-template #content let-c="close" let-d="dismiss">
   <div class="modal-header">
-    <h4 class="modal-title">Modal title</h4>
+    <h4 class="modal-title">标注列表</h4>
     <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -123,10 +122,10 @@
       <table class="table table-bordered">
         <thead class="thead-light">
         <tr>
-          <th style="width: 25%">ID</th>
-          <th style="width: 25%">Name</th>
-          <th style="width: 25%">Area Count</th>
-          <th style="width: 25%">Tag</th>
+          <th style="width: 25%">百度ID</th>
+          <th style="width: 25%">名称</th>
+          <th style="width: 25%">框数</th>
+          <th style="width: 25%">标签</th>
         </tr>
         </thead>
         <tbody>
@@ -141,6 +140,6 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
+    <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">关闭</button>
   </div>
 </ng-template>

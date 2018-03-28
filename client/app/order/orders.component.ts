@@ -51,12 +51,12 @@ export class OrdersComponent implements OnInit {
   }
 
   deleteOrder(order: Order) {
-    if (window.confirm('Are you sure you want to permanently delete this item?')) {
+    if (window.confirm('确认要删除订单么?')) {
       this.orderService.deleteOrder(order).subscribe(
         () => {
           const pos = this.orders.map(elem => elem._id).indexOf(order._id);
           this.orders.splice(pos, 1);
-          this.toast.setMessage('item deleted successfully.', 'success');
+          this.toast.setMessage('订单删除成功.', 'success');
         },
         error => console.log(error)
       );

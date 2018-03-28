@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
+import { AuthService } from '../services/auth.service';
 import { TopicService } from '../services/topic.service';
 import { ToastComponent } from '../shared/toast/toast.component';
 import { Topic } from '../shared/models/topic.model';
@@ -37,7 +38,8 @@ export class TopicsComponent implements OnInit {
   withhold = new FormControl('', Validators.required);
   note = new FormControl('');
 
-  constructor(private topicService: TopicService,
+  constructor(public auth: AuthService,
+              private topicService: TopicService,
               private formBuilder: FormBuilder,
               private config: NgbPaginationConfig,
               private modalService: NgbModal,
@@ -76,7 +78,7 @@ export class TopicsComponent implements OnInit {
       res => {
         this.topics.push(res);
         this.addTopicForm.reset();
-        this.toast.setMessage('item added successfully.', 'success');
+        this.toast.setMessage('题包增加成功.', 'success');
       },
       error => console.log(error)
     );
@@ -90,7 +92,7 @@ export class TopicsComponent implements OnInit {
   cancelEditing() {
     this.isEditing = false;
     this.topic = new Topic();
-    this.toast.setMessage('item editing cancelled.', 'warning');
+    this.toast.setMessage('取消编辑题包.', 'warning');
     // reload the topics to reset the editing
     this.getTopics();
   }
@@ -100,19 +102,19 @@ export class TopicsComponent implements OnInit {
       () => {
         this.isEditing = false;
         this.topic = topic;
-        this.toast.setMessage('item edited successfully.', 'success');
+        this.toast.setMessage('题包编辑成功.', 'success');
       },
       error => console.log(error)
     );
   }
 
   deleteTopic(topic: Topic) {
-    if (window.confirm('Are you sure you want to permanently delete this item?')) {
+    if (window.confirm('确认要删除题包么?')) {
       this.topicService.deleteTopic(topic).subscribe(
         () => {
           const pos = this.topics.map(elem => elem._id).indexOf(topic._id);
           this.topics.splice(pos, 1);
-          this.toast.setMessage('item deleted successfully.', 'success');
+          this.toast.setMessage('题包删除成功.', 'success');
         },
         error => console.log(error)
       );
@@ -121,12 +123,12 @@ export class TopicsComponent implements OnInit {
 
   importMarks(topic: Topic) {
     this.topic = topic;
-    if (window.confirm('Are you sure you want to import members?')) {
+    if (window.confirm('确认要导入标注信息么?')) {
       this.topicService.importMembers(topic).subscribe(
         (res) => {
           console.log(res);
           this.topic.marks = res;
-          this.toast.setMessage('item import successfully.', 'success');
+          this.toast.setMessage('信息导入成功.', 'success');
         },
         error => console.log(error)
       );
@@ -164,10 +166,10 @@ export class TopicsComponent implements OnInit {
    * 多选题包结算
    */
   settleTopic() {
-    if (window.confirm('Are you sure you want to generate order?')) {
+    if (window.confirm('确认要生成订单么?')) {
       this.topicService.genOrder(this.topics).subscribe(
         (res) => {
-          this.toast.setMessage('item import successfully.', 'success');
+          this.toast.setMessage('成功生成订单.', 'success');
           window.location.href = '/orders';
         },
         error => console.log(error)
@@ -187,7 +189,7 @@ export class TopicsComponent implements OnInit {
 
       this.topicService.uploadMark(formData).subscribe((res) => {
         this.topic.marks = res;
-        this.toast.setMessage('item import successfully.', 'success');
+        this.toast.setMessage('标注信息上传成功.', 'success');
       }, error => console.log(error));
     }
   }

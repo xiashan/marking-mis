@@ -86,7 +86,7 @@ export class MembersComponent implements OnInit {
         this.addMemberForm.patchValue({
           _agent: '',
         });
-        this.toast.setMessage('item added successfully.', 'success');
+        this.toast.setMessage('标注员增加成功.', 'success');
       },
       error => console.log(error)
     );
@@ -100,7 +100,7 @@ export class MembersComponent implements OnInit {
   cancelEditing() {
     this.isEditing = false;
     this.member = new Member();
-    this.toast.setMessage('item editing cancelled.', 'warning');
+    this.toast.setMessage('取消编辑标注员.', 'warning');
     // reload the members to reset the editing
     this.getMembers();
   }
@@ -110,19 +110,19 @@ export class MembersComponent implements OnInit {
       () => {
         this.isEditing = false;
         this.member = member;
-        this.toast.setMessage('item edited successfully.', 'success');
+        this.toast.setMessage('标注员编辑成功.', 'success');
       },
       error => console.log(error)
     );
   }
 
   deleteMember(member: Member) {
-    if (window.confirm('Are you sure you want to permanently delete this item?')) {
+    if (window.confirm('确认要删除标注员么?')) {
       this.memberService.deleteMember(member).subscribe(
         () => {
           const pos = this.members.map(elem => elem._id).indexOf(member._id);
           this.members.splice(pos, 1);
-          this.toast.setMessage('item deleted successfully.', 'success');
+          this.toast.setMessage('标注员删除成功.', 'success');
         },
         error => console.log(error)
       );

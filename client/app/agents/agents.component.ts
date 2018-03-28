@@ -63,7 +63,7 @@ export class AgentsComponent implements OnInit {
       res => {
         this.agents.push(res);
         this.addAgentForm.reset();
-        this.toast.setMessage('item added successfully.', 'success');
+        this.toast.setMessage('代理商增加成功.', 'success');
       },
       error => console.log(error)
     );
@@ -77,7 +77,7 @@ export class AgentsComponent implements OnInit {
   cancelEditing() {
     this.isEditing = false;
     this.agent = new Agent();
-    this.toast.setMessage('item editing cancelled.', 'warning');
+    this.toast.setMessage('取消编辑代理商.', 'warning');
     // reload the agents to reset the editing
     this.getAgents();
   }
@@ -87,19 +87,19 @@ export class AgentsComponent implements OnInit {
       () => {
         this.isEditing = false;
         this.agent = agent;
-        this.toast.setMessage('item edited successfully.', 'success');
+        this.toast.setMessage('代理商编辑成功.', 'success');
       },
       error => console.log(error)
     );
   }
 
   deleteAgent(agent: Agent) {
-    if (window.confirm('Are you sure you want to permanently delete this item?')) {
+    if (window.confirm('确认要删除代理商么?')) {
       this.agentService.deleteAgent(agent).subscribe(
         () => {
           const pos = this.agents.map(elem => elem._id).indexOf(agent._id);
           this.agents.splice(pos, 1);
-          this.toast.setMessage('item deleted successfully.', 'success');
+          this.toast.setMessage('代理商删除成功.', 'success');
         },
         error => console.log(error)
       );
